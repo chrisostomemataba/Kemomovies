@@ -1,0 +1,293 @@
+/* src/components/hero/Hero.module.css */
+
+/* Core Layout */
+.heroSection {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  perspective: 1000px;
+}
+
+.backgroundWrapper {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.backgroundImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  animation: zoomBackground 20s infinite alternate ease-in-out;
+}
+
+.backgroundImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  transition: opacity 1000ms ease;
+}
+
+.backgroundImage.active img {
+  opacity: 1;
+}
+
+/* Gradient Overlays */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    0deg,
+    rgba(20, 20, 20, 1) 0%,
+    rgba(20, 20, 20, 0.8) 20%,
+    rgba(20, 20, 20, 0.4) 50%,
+    rgba(20, 20, 20, 0.8) 100%
+  );
+}
+
+/* Content Styling */
+.content {
+  position: relative;
+  z-index: 10;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  animation: contentRise 1s ease-out forwards;
+}
+
+.titleWrapper {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.05em;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(
+    45deg,
+    #E6B325 0%,
+    #F7C64B 50%,
+    #E6B325 100%
+  );
+  text-shadow: 0 0 40px rgba(230, 179, 37, 0.3);
+  transition: transform 300ms ease;
+}
+
+.title:hover {
+  transform: scale(1.02);
+}
+
+.titleSlide {
+  opacity: 0;
+  animation: slideUp 800ms ease-out forwards;
+}
+
+/* Metadata and Description */
+.metadata {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+  opacity: 0;
+  animation: fadeIn 800ms ease-out 300ms forwards;
+}
+
+.metadataItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgb(209, 213, 219);
+}
+
+.description {
+  margin-top: 1.5rem;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  color: rgb(209, 213, 219);
+  max-width: 42rem;
+  opacity: 0;
+  animation: fadeIn 800ms ease-out 600ms forwards;
+  line-height: 1.6;
+}
+
+/* Buttons */
+.buttonContainer {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  opacity: 0;
+  transform: translateY(1rem);
+  animation: fadeInUp 800ms ease-out 900ms forwards;
+}
+
+.ctaButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 300ms ease;
+  overflow: hidden;
+}
+
+.primaryCta {
+  background: linear-gradient(to right, #E6B325, #F7C64B);
+  color: rgb(17, 24, 39);
+}
+
+.primaryCta:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(230, 179, 37, 0.4);
+}
+
+.secondaryCta {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.secondaryCta:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+/* Slide Progress and Indicators */
+.indicators {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.75rem;
+  z-index: 20;
+}
+
+.indicator {
+  height: 4px;
+  width: 3rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 500ms ease;
+}
+
+.indicatorActive {
+  width: 4rem;
+  background: #E6B325;
+  box-shadow: 0 0 10px #E6B325;
+}
+
+.slideProgress {
+  position: absolute;
+  left: 0;
+  height: 100%;
+  background: #E6B325;
+  animation: progressBar 6s linear;
+}
+
+/* Animations */
+@keyframes zoomBackground {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
+}
+
+@keyframes contentRise {
+  0% {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes progressBar {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+
+/* Dark Mode Adjustments */
+:global(.dark) .title {
+  text-shadow: 0 0 60px rgba(230, 179, 37, 0.4);
+}
+
+:global(.dark) .overlay {
+  background: linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.8) 20%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+  .content {
+    padding: 0 1rem;
+  }
+
+  .metadata {
+    flex-wrap: wrap;
+  }
+
+  .buttonContainer {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .ctaButton {
+    width: 100%;
+    justify-content: center;
+  }
+}

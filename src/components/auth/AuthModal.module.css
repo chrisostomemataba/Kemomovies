@@ -1,0 +1,53 @@
+/* src/components/auth/AuthModal.module.css */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 50;
+    opacity: 0;
+    animation: fadeIn 200ms ease forwards;
+  }
+  
+  .modalContainer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    width: min(95%, 500px);
+    z-index: 51;
+    opacity: 0;
+    animation: scaleIn 300ms ease forwards;
+  }
+  
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes scaleIn {
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .modalContainer {
+      animation: slideUp 300ms ease forwards;
+      bottom: 0;
+      top: auto;
+      left: 0;
+      right: 0;
+      transform: translateY(100%);
+      width: 100%;
+    }
+  
+    @keyframes slideUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }

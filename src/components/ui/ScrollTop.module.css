@@ -1,0 +1,40 @@
+/* src/components/ui/ScrollTop.module.css */
+.scrollTop {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: rgba(230, 179, 37, 0.9);
+    color: black;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(1rem);
+    transition: all 300ms ease;
+    z-index: 40;
+  }
+  
+  .scrollTop.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  .scrollTop:hover {
+    background: #F7C64B;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(230, 179, 37, 0.3);
+  }
+  
+  @media (max-width: 640px) {
+    .scrollTop {
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+  }

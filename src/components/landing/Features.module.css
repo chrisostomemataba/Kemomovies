@@ -1,0 +1,43 @@
+/* src/components/landing/Features.module.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+.featureCard {
+    isolation: isolate;
+  }
+  
+  .animatedBorder {
+    animation: borderGlow 2s ease-in-out infinite;
+  }
+  
+  .devicesImage {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes borderGlow {
+    0%, 100% {
+      opacity: 0.2;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0) rotateX(2deg);
+    }
+    50% {
+      transform: translateY(-20px) rotateX(-2deg);
+    }
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    .animatedBorder,
+    .devicesImage {
+      animation: none;
+    }
+  }

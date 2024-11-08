@@ -1,0 +1,197 @@
+/* src/components/header/Header.module.css */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    transition: all 400ms ease;
+  }
+  
+  .headerScrolled {
+    background: rgba(20, 20, 20, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transform: translateY(0);
+    transition: transform 300ms ease;
+  }
+  
+  .logo:hover {
+    transform: translateY(-2px);
+  }
+  
+  .logoImage {
+    height: 2.5rem;
+    width: auto;
+  }
+  
+  .logoText {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.75rem;
+    background: linear-gradient(45deg, #E6B325, #F7C64B);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 700;
+  }
+  
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+  
+  .buttonGroup {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .button {
+    padding: 0.625rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 300ms ease;
+    font-size: 0.875rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .loginButton {
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+  }
+  
+  .loginButton:hover {
+    border-color: #E6B325;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(230, 179, 37, 0.2);
+  }
+  
+  .signupButton {
+    background: linear-gradient(45deg, #E6B325, #F7C64B);
+    color: black;
+    position: relative;
+  }
+  
+  .signupButton::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, #F7C64B, #E6B325);
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+  
+  .signupButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(230, 179, 37, 0.3);
+  }
+  
+  .signupButton:hover::before {
+    opacity: 1;
+  }
+  
+  .signupButton span {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .mobileMenu {
+    display: none;
+  }
+  
+  /* Mobile menu styles */
+  .mobileButton {
+    display: none;
+    padding: 0.5rem;
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .mobileNav {
+    position: fixed;
+    top: 4rem;
+    left: 0;
+    right: 0;
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1rem;
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: all 300ms ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .mobileNav.active {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  
+  @media (max-width: 768px) {
+    .container {
+      padding: 1rem;
+    }
+  
+    .nav {
+      display: none;
+    }
+  
+    .mobileButton {
+      display: block;
+    }
+  
+    .mobileMenu {
+      display: block;
+    }
+  
+    .buttonGroup {
+      flex-direction: column;
+      width: 100%;
+      gap: 0.5rem;
+    }
+  
+    .button {
+      width: 100%;
+      text-align: center;
+    }
+  
+    .logoText {
+      font-size: 1.5rem;
+    }
+  
+    .logoImage {
+      height: 2rem;
+    }
+  }
+  
+  /* Animation keyframes */
+  @keyframes slideDown {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }

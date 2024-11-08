@@ -1,0 +1,26 @@
+/* src/styles/globals.css */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Raleway:wght@600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-kemo-gray-900 dark:bg-kemo-black dark:text-white;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand-gold hover:bg-brand-darker text-kemo-black font-semibold px-6 py-2 rounded-md transition-colors duration-200;
+  }
+
+  .btn-secondary {
+    @apply bg-transparent hover:bg-kemo-gray-100/10 text-white border border-white/20 font-semibold px-6 py-2 rounded-md transition-colors duration-200;
+  }
+
+  .nav-link {
+    @apply text-kemo-gray-300 hover:text-white transition-colors duration-200;
+  }
+}
