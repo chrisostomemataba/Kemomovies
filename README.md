@@ -103,3 +103,5 @@ graph LR
   },
 })
 ```
+```
+PS: USE PNPM RUN SERVE  to run the project i did not use npm
