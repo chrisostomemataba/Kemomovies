@@ -62,7 +62,7 @@ export default tseslint.config({
 
 ### 🔐 Authentication & Session Management
 
-> ⚠️ **Note:**Login via Google Authenticatiom
+> 🔑 **Login Instructions:** Use the Google Sign-In button to access the platform. All features are currently using sample data for demonstration purposes.
 
 #### Current Implementation:
 - ✅ Google Authentication sign-in/sign-up
@@ -76,21 +76,21 @@ export default tseslint.config({
 - 🔄 Real-time data synchronization
 
 ### 🗃️ Data Management
+### 🔐 Authentication
 ```mermaid
-graph TD
-    A[User Interface] -->|Sample Data| B[Dashboard]
-    A -->|Mock Data| C[Profile]
-    A -->|Static Content| D[Settings]
-    E[Google Auth] -->|Authentication| A
-    F[Database Connection] -->|⚠️ Pending| A
+graph LR
+    A[Login] -->|Google Auth| B[Platform Access]
+    C[Sign Up] -->|Google Auth| B
 ```
 
-### 🔜 Next Steps
-1. 🔌 Establish Supabase database connection
-2. 🔐 Implement session management
-3. 💾 Migrate from sample to real data
-4. 🔄 Add real-time synchronization
-5. 📱 Enhance user experience with actual data
+### 🎯 Current Stack
+- ⚛️ React with TypeScript
+- 🎨 TailwindCSS
+- 📊 Recharts for data visualization
+- 🔐 Google Authentication
+- 💫 Lucide Icons
+
+
 
 ---
     react,
