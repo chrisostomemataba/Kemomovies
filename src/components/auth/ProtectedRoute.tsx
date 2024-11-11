@@ -1,6 +1,7 @@
 // src/components/auth/ProtectedRoute.tsx
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { Loader } from '../ui/LoadingSpinner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,7 +13,7 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
   const location = useLocation();
 
   if (isLoading) {
-    return <div>Loading...</div>; // Replace with your loading component
+    return <Loader />; // Replace with your loading component
   }
 
   if (requireAuth && !user) {

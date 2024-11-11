@@ -16,6 +16,8 @@ import {
 import { tmdbService } from '../../services/tmdb';
 import type { MovieDetails, Cast, Video, Movie } from '../../types/movie';
 import { MovieCard } from '../../components/shared/MovieCard';
+import Footer from '../../components/layout/Footer';
+import { Navbar } from '../../components/authrnticated/navbar/Navbar';
 
 interface VideoPlayerProps {
   videoKey: string;
@@ -87,6 +89,7 @@ const VideoPlayer = ({ videoKey, poster, autoplay = true }: VideoPlayerProps) =>
 
   return (
     <div className="relative aspect-video rounded-xl overflow-hidden">
+    
       {/* Poster image shown until video is ready */}
       {!isReady && (
         <div className="absolute inset-0">
@@ -354,6 +357,7 @@ export default function MovieDetailsPage() {
               />
             ))}
           </div>
+        
         </section>
       </div>
     </div>

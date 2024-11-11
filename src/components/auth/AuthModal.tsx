@@ -135,7 +135,7 @@ const AuthForm = ({
   </div>
 );
 
-export function AuthModal({ 
+export  function AuthModal({ 
   isOpen, 
   onClose, 
   initialView = 'login', 

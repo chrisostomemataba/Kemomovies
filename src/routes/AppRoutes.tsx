@@ -6,6 +6,7 @@ import Landing from '../pages/landing/index';
 import Home from '../pages/home';
 import MovieDetails from '../pages/movies/[id]';
 import SettingsPage from '../pages/settings';
+import { DashboardPage } from '../pages/dashboard';
 
 export default function AppRoutes() {
   return (
@@ -17,6 +18,7 @@ export default function AppRoutes() {
       <Route element={<AuthenticatedLayout />}>
         <Route path="/home" element={<Home />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/movies/:id" element={<MovieDetails />} />
       </Route>
     </Routes>

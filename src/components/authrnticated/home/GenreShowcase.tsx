@@ -1,6 +1,6 @@
-// src/components/home/GenreShowcase.tsx
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
   Film, 
   Play, 
@@ -27,11 +27,17 @@ interface MovieCardProps {
 // Movie Card Component with Multiple Variants
 const MovieCard = ({ movie, variant = 'portrait', onPlay, onDetails }: MovieCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
 
   const variants = {
     portrait: "w-[200px] aspect-[2/3]",
     landscape: "w-[300px] aspect-video",
     compact: "w-[160px] aspect-[2/3]"
+  };
+
+  const handlePlayClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/movies/${movie.id}`);
   };
 
   return (
@@ -72,7 +78,7 @@ const MovieCard = ({ movie, variant = 'portrait', onPlay, onDetails }: MovieCard
 
             <div className="flex gap-2">
               <button
-                onClick={() => onPlay?.(movie.id)}
+                onClick={handlePlayClick}
                 className="flex-1 py-1.5 bg-brand-gold hover:bg-brand-darker
                   rounded-md text-kemo-black text-xs font-medium
                   flex items-center justify-center gap-1
@@ -100,6 +106,7 @@ const MovieCard = ({ movie, variant = 'portrait', onPlay, onDetails }: MovieCard
 const TopPicksSection = () => {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [topPicks, setTopPicks] = useState<Movie[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchTopPicks = async () => {
@@ -112,6 +119,10 @@ const TopPicksSection = () => {
   }, []);
 
   if (!selectedMovie) return null;
+
+  const handleWatchNow = () => {
+    navigate(`/movies/${selectedMovie.id}`);
+  };
 
   return (
     <div className="grid grid-cols-2 gap-8 bg-kemo-gray-900/50 
@@ -148,10 +159,12 @@ const TopPicksSection = () => {
           </p>
 
           <div className="flex space-x-4">
-            <button className="px-6 py-2 bg-brand-gold hover:bg-brand-darker
-              text-kemo-black font-medium rounded-lg
-              flex items-center space-x-2
-              transition-colors duration-300">
+            <button 
+              onClick={handleWatchNow}
+              className="px-6 py-2 bg-brand-gold hover:bg-brand-darker
+                text-kemo-black font-medium rounded-lg
+                flex items-center space-x-2
+                transition-colors duration-300">
               <Play className="w-4 h-4" />
               <span>Watch Now</span>
             </button>
@@ -204,6 +217,7 @@ const TopPicksSection = () => {
 export const GenreShowcase = () => {
   const [genreMovies, setGenreMovies] = useState<Record<number, Movie[]>>({});
   const [genres, setGenres] = useState<Genre[]>([]);
+  const navigate = useNavigate();
 
   // Fetch genres and movies
   useEffect(() => {
@@ -238,6 +252,10 @@ export const GenreShowcase = () => {
     return 'compact';
   };
 
+  const handlePlayMovie = useCallback((movieId: number) => {
+    navigate(`/movies/${movieId}`);
+  }, [navigate]);
+
   return (
     <div className="space-y-12">
       {/* Top Picks Section */}
@@ -266,6 +284,7 @@ export const GenreShowcase = () => {
                     key={movie.id} 
                     movie={movie} 
                     variant="portrait"
+                    onPlay={handlePlayMovie}
                   />
                 ))}
               </div>
@@ -276,6 +295,7 @@ export const GenreShowcase = () => {
                     key={movie.id} 
                     movie={movie} 
                     variant="landscape"
+                    onPlay={handlePlayMovie}
                   />
                 ))}
               </div>
@@ -286,6 +306,7 @@ export const GenreShowcase = () => {
                     key={movie.id} 
                     movie={movie} 
                     variant="compact"
+                    onPlay={handlePlayMovie}
                   />
                 ))}
               </div>

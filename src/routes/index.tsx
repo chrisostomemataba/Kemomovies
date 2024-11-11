@@ -1,10 +1,11 @@
 // src/routes/index.tsx
 import { Route, Routes as RouterRoutes, Navigate } from 'react-router-dom';
 import { PublicLayout } from '../layouts/PublicLayout';
-import { AuthenticatedLayout } from '../layouts/AuthenticatedLayout';
+import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import { LandingPage } from '../pages/landing/index';
 import { LoginPage } from '../pages/auth/login';
 import { SignupPage } from '../pages/auth/signup';
+import { SettingsPage } from '../pages/settings';
 
 import { useAuth } from '../hooks/useAuth';
 
@@ -18,6 +19,7 @@ export function Routes() {
         <Route index element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path='/settings' element={<SettingsPage />} />
       </Route>
 
       {/* Protected Routes */}

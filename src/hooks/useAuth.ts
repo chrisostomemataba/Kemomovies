@@ -1,18 +1,21 @@
-// src/hooks/useAuth.ts
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   AuthError, 
-  AuthResponse, 
-  AuthTokenResponse,
-  OAuthResponse,
-  User,
+  User, 
   Session 
 } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { toast } from '../components/ui/toast';
 import type { Database } from '../types/supabase';
-import type { Profile } from '../types/user';
+
+export interface Profile {
+  id: string;
+  username: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 interface AuthState {
   user: User | null;
@@ -28,6 +31,38 @@ interface AuthCredentials {
   username?: string;
 }
 
+async function initializeUserProfile(
+  userId: string,
+  username?: string
+): Promise<void> {
+  const timestamp = new Date().toISOString();
+  
+  // Insert into profiles table
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .upsert({
+      id: userId,
+      username: username || userId,
+      created_at: timestamp,
+      updated_at: timestamp
+    });
+
+  if (profileError) throw profileError;
+
+  // Initialize user preferences
+  const { error: prefError } = await supabase
+    .from('user_preferences')
+    .upsert({
+      user_id: userId,
+      preferred_language: 'en',
+      enable_notifications: true,
+      theme: 'dark',
+      favorite_genres: []
+    });
+
+  if (prefError) throw prefError;
+}
+
 export function useAuth() {
   const navigate = useNavigate();
   const [state, setState] = useState<AuthState>({
@@ -39,14 +74,23 @@ export function useAuth() {
   });
 
   useEffect(() => {
-    // Check active session
-    const checkSession = async () => {
+    let mounted = true;
+
+    // Initial session check
+    async function checkSession() {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
 
-        if (session?.user) {
-          const profile = await fetchProfile(session.user.id);
+        if (session?.user && mounted) {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profileError) throw profileError;
+
           setState({
             session,
             user: session.user,
@@ -54,7 +98,7 @@ export function useAuth() {
             loading: false,
             error: null
           });
-        } else {
+        } else if (mounted) {
           setState({
             session: null,
             user: null,
@@ -64,28 +108,46 @@ export function useAuth() {
           });
         }
       } catch (error) {
-        setState(prev => ({
-          ...prev,
-          loading: false,
-          error: error instanceof Error ? error : new Error('Session check failed')
-        }));
+        if (mounted) {
+          setState(prev => ({
+            ...prev,
+            loading: false,
+            error: error instanceof Error ? error : new Error('Session check failed')
+          }));
+        }
       }
-    };
+    }
 
     checkSession();
 
-    // Set up auth state change listener
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+
         if (session?.user) {
-          const profile = await fetchProfile(session.user.id);
-          setState({
-            session,
-            user: session.user,
-            profile,
-            loading: false,
-            error: null
-          });
+          try {
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+
+            if (profileError) throw profileError;
+
+            setState({
+              session,
+              user: session.user,
+              profile,
+              loading: false,
+              error: null
+            });
+          } catch (error) {
+            setState(prev => ({
+              ...prev,
+              error: error instanceof Error ? error : new Error('Failed to fetch profile')
+            }));
+          }
         } else {
           setState({
             session: null,
@@ -99,160 +161,144 @@ export function useAuth() {
     );
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
 
-  const fetchProfile = async (userId: string): Promise<Profile | null> => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-
-    if (error) throw error;
-    return data;
-  };
-
-  const signIn = async ({ email, password }: AuthCredentials): Promise<void> => {
+  const signIn = async ({ email, password }: AuthCredentials) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) throw error;
 
+      // Successful login - the onAuthStateChange listener will update the state
       toast({
         title: "Welcome back!",
-        description: "Successfully signed in.",
-        variant: "default",
+        description: "Successfully signed in",
+        variant: "default"
       });
 
       navigate('/home');
     } catch (error) {
-      const message = error instanceof AuthError 
-        ? error.message 
-        : 'Failed to sign in';
-      
+      const message = error instanceof AuthError ? error.message : 'Failed to sign in';
       toast({
         title: "Sign in failed",
         description: message,
-        variant: "destructive",
+        variant: "destructive"
       });
-
       throw error;
     } finally {
       setState(prev => ({ ...prev, loading: false }));
     }
   };
 
-  const signUp = async ({ email, password, username }: AuthCredentials): Promise<void> => {
+  const signUp = async ({ email, password, username }: AuthCredentials) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
 
-      const { error } = await supabase.auth.signUp({
+      // Create auth user
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            username: username || email.split('@')[0],
-          },
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+            username: username || email.split('@')[0]
+          }
         }
       });
 
       if (error) throw error;
+
+      // If user was created, initialize their profile
+      if (data.user) {
+        await initializeUserProfile(data.user.id, username);
+      }
 
       toast({
         title: "Account created",
-        description: "Please check your email to confirm your account.",
-        variant: "default",
+        description: "Please check your email to confirm your account",
+        variant: "default"
       });
+
+      // Don't navigate - wait for email confirmation
     } catch (error) {
-      const message = error instanceof AuthError 
-        ? error.message 
-        : 'Failed to create account';
-      
+      const message = error instanceof AuthError ? error.message : 'Failed to create account';
       toast({
         title: "Sign up failed",
         description: message,
-        variant: "destructive",
+        variant: "destructive"
       });
-
       throw error;
     } finally {
       setState(prev => ({ ...prev, loading: false }));
     }
   };
 
-  const signInWithGoogle = async (): Promise<void> => {
+  const signInWithGoogle = async () => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent'
+          }
         }
       });
 
       if (error) throw error;
+
+      // The redirect will happen automatically
     } catch (error) {
-      const message = error instanceof AuthError 
-        ? error.message 
-        : 'Failed to sign in with Google';
-      
+      const message = error instanceof AuthError ? error.message : 'Failed to sign in with Google';
       toast({
         title: "Sign in failed",
         description: message,
-        variant: "destructive",
+        variant: "destructive"
       });
-
       throw error;
     } finally {
       setState(prev => ({ ...prev, loading: false }));
     }
   };
 
-  const signOut = async (): Promise<void> => {
+  const signOut = async () => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
 
-      // Clear any local state/storage
-      localStorage.removeItem('user-preferences');
-      
       toast({
         title: "Signed out",
-        description: "Successfully signed out. See you next time!",
-        variant: "default",
+        description: "Successfully signed out",
+        variant: "default"
       });
 
-      // Navigate to landing page
       navigate('/');
     } catch (error) {
-      const message = error instanceof AuthError 
-        ? error.message 
-        : 'Failed to sign out';
-      
+      const message = error instanceof AuthError ? error.message : 'Failed to sign out';
       toast({
         title: "Sign out failed",
         description: message,
-        variant: "destructive",
+        variant: "destructive"
       });
-
       throw error;
     } finally {
       setState(prev => ({ ...prev, loading: false }));
     }
   };
 
-  const resetPassword = async (email: string): Promise<void> => {
+  const resetPassword = async (email: string) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       
@@ -264,61 +310,16 @@ export function useAuth() {
 
       toast({
         title: "Password reset email sent",
-        description: "Please check your email for the reset link.",
-        variant: "default",
+        description: "Please check your email for the reset link",
+        variant: "default"
       });
     } catch (error) {
-      const message = error instanceof AuthError 
-        ? error.message 
-        : 'Failed to send reset email';
-      
+      const message = error instanceof AuthError ? error.message : 'Failed to send reset email';
       toast({
         title: "Password reset failed",
         description: message,
-        variant: "destructive",
+        variant: "destructive"
       });
-
-      throw error;
-    } finally {
-      setState(prev => ({ ...prev, loading: false }));
-    }
-  };
-
-  const updateProfile = async (updates: Partial<Profile>): Promise<void> => {
-    try {
-      setState(prev => ({ ...prev, loading: true, error: null }));
-      
-      if (!state.user) throw new Error('No user logged in');
-
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', state.user.id);
-
-      if (error) throw error;
-
-      // Update local state
-      setState(prev => ({
-        ...prev,
-        profile: prev.profile ? { ...prev.profile, ...updates } : null
-      }));
-
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated.",
-        variant: "default",
-      });
-    } catch (error) {
-      const message = error instanceof Error 
-        ? error.message 
-        : 'Failed to update profile';
-      
-      toast({
-        title: "Profile update failed",
-        description: message,
-        variant: "destructive",
-      });
-
       throw error;
     } finally {
       setState(prev => ({ ...prev, loading: false }));
@@ -331,7 +332,6 @@ export function useAuth() {
     signUp,
     signInWithGoogle,
     signOut,
-    resetPassword,
-    updateProfile
+    resetPassword
   };
 }

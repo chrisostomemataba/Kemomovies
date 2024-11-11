@@ -1,274 +1,327 @@
-// src/pages/settings/index.tsx
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { 
   User, 
-  LogOut, 
+  Settings, 
+  Bell, 
+  Moon,
+  Sun, 
+  LogOut,
   Save,
-  Mail, 
-  Lock,
-  Bell,
-  Palette,
-  Film
+  Camera,
+  Edit,
+  Mail,
+  Calendar,
+  Film,
+  Heart,
+  Clock,
+  ChevronRight,
+  Activity,
+  AlertTriangle
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../hooks/useAuth';
-import { toast } from '../../components/ui/toast';
 
-interface UserPreferences {
-  favorite_genres: string[];
-  preferred_language: string;
-  enable_notifications: boolean;
-  theme: string;
-}
-
-interface UserProfile {
-  username: string;
-  avatar_url: string | null;
-  email: string;
-}
+// ... Previous code remains the same until the Action Buttons section ...
+const sampleUser = {
+  name: "Thomas Anderson",
+  username: "neo_matrix",
+  email: "neo@matrix.com",
+  avatar: "/api/placeholder/150/150",
+  joinDate: "2024-01-15",
+  watchedMovies: 42,
+  watchlist: 13,
+  favoriteGenres: ["Sci-Fi", "Action", "Drama"],
+  recentActivity: [
+    { type: 'watch', movie: 'Inception', date: '2024-03-10' },
+    { type: 'rate', movie: 'The Dark Knight', date: '2024-03-09', rating: 5 },
+    { type: 'watchlist', movie: 'Dune: Part Two', date: '2024-03-08' }
+  ]
+};
 
 export default function SettingsPage() {
-  const { handleLogout, isLoading } = useAuth();
-  const navigate = useNavigate();
-  
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [preferences, setPreferences] = useState<UserPreferences | null>(null);
+  const [activeTab, setActiveTab] = useState('general');
+  const [isDark, setIsDark] = useState(true);
+  const [notifications, setNotifications] = useState(true);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    fetchUserData();
-  }, []);
-
-  const fetchUserData = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        navigate('/');
-        return;
-      }
-
-      // Fetch profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError) throw profileError;
-
-      // Fetch preferences
-      const { data: preferencesData, error: preferencesError } = await supabase
-        .from('user_preferences')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      if (preferencesError) throw preferencesError;
-
-      setProfile(profileData);
-      setPreferences(preferencesData);
-
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      toast({
-        title: "Error loading settings",
-        description: "Please try again later",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleSavePreferences = async () => {
-    if (!preferences) return;
-
-    try {
-      setIsSaving(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) throw new Error('No user found');
-
-      const { error } = await supabase
-        .from('user_preferences')
-        .upsert({
-          user_id: user.id,
-          ...preferences
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Settings saved",
-        description: "Your preferences have been updated",
-        variant: "default",
-      });
-
-    } catch (error) {
-      console.error('Error saving preferences:', error);
-      toast({
-        title: "Error saving settings",
-        description: "Please try again",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
+  const handleSave = async () => {
+    setIsSaving(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsSaving(false);
   };
 
   return (
-    <div className="min-h-screen bg-kemo-black py-12">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <h1 className="text-3xl font-display font-bold text-white mb-8">
-          Settings
-        </h1>
+    <div className="min-h-screen bg-kemo-black text-white">
+      {/* Previous sections remain the same ... */}
+          {/* Header */}
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold">Settings</h1>
+            <div className="flex space-x-4">
+              <button
+                onClick={() => setActiveTab('general')}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  activeTab === 'general'
+                    ? 'bg-brand-gold text-black'
+                    : 'bg-kemo-gray-800 hover:bg-kemo-gray-700'
+                }`}
+              >
+                General
+              </button>
+              <button
+                onClick={() => setActiveTab('preferences')}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  activeTab === 'preferences'
+                    ? 'bg-brand-gold text-black'
+                    : 'bg-kemo-gray-800 hover:bg-kemo-gray-700'
+                }`}
+              >
+                Preferences
+              </button>
+            </div>
+          </div>
 
-        <div className="space-y-8">
-          {/* Profile Section */}
-          <section className="bg-kemo-gray-900/50 rounded-xl p-6 
-            border border-white/10">
-            <h2 className="text-xl font-display font-bold text-white mb-6 
-              flex items-center gap-2">
-              <User className="w-5 h-5 text-brand-gold" />
-              Profile
-            </h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-white/60 mb-2">
-                  Email
-                </label>
-                <div className="flex items-center space-x-2">
-                  <Mail className="w-5 h-5 text-white/40" />
-                  <span className="text-white">
-                    {profile?.email}
-                  </span>
+          {/* Settings Content */}
+          {activeTab === 'general' ? (
+            <div className="space-y-6">
+              {/* Profile Settings */}
+              <div className="bg-kemo-gray-800 rounded-xl p-6">
+                <h2 className="text-xl font-semibold mb-6">Profile Settings</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white/80 mb-1">
+                      Display Name
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue={sampleUser.name}
+                      className="w-full px-4 py-2 bg-kemo-gray-900 rounded-lg border border-white/10 focus:border-brand-gold focus:outline-none transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/80 mb-1">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      defaultValue={sampleUser.email}
+                      className="w-full px-4 py-2 bg-kemo-gray-900 rounded-lg border border-white/10 focus:border-brand-gold focus:outline-none transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/80 mb-1">
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      defaultValue="********"
+                      className="w-full px-4 py-2 bg-kemo-gray-900 rounded-lg border border-white/10 focus:border-brand-gold focus:outline-none transition-colors"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm text-white/60 mb-2">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  value={profile?.username || ''}
-                  onChange={(e) => setProfile(prev => ({
-                    ...prev!,
-                    username: e.target.value
-                  }))}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg
-                    px-4 py-2 text-white focus:border-brand-gold/50 
-                    focus:ring-1 focus:ring-brand-gold/50
-                    transition-colors duration-200"
-                />
+              {/* Privacy Settings */}
+              <div className="bg-kemo-gray-800 rounded-xl p-6">
+                <h2 className="text-xl font-semibold mb-6">Privacy Settings</h2>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">Profile Visibility</h3>
+                      <p className="text-sm text-white/60">
+                        Control who can see your watch history
+                      </p>
+                    </div>
+                    <select className="px-4 py-2 bg-kemo-gray-900 rounded-lg border border-white/10 focus:border-brand-gold focus:outline-none">
+                      <option>Public</option>
+                      <option>Friends Only</option>
+                      <option>Private</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
-          </section>
-
-          {/* Preferences Section */}
-          <section className="bg-kemo-gray-900/50 rounded-xl p-6 
-            border border-white/10">
-            <h2 className="text-xl font-display font-bold text-white mb-6
-              flex items-center gap-2">
-              <Film className="w-5 h-5 text-brand-gold" />
-              Preferences
-            </h2>
-
+          ) : (
             <div className="space-y-6">
-              {/* Language */}
-              <div>
-                <label className="block text-sm text-white/60 mb-2">
-                  Preferred Language
-                </label>
-                <select
-                  value={preferences?.preferred_language || 'en'}
-                  onChange={(e) => setPreferences(prev => ({
-                    ...prev!,
-                    preferred_language: e.target.value
-                  }))}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg
-                    px-4 py-2 text-white focus:border-brand-gold/50
-                    focus:ring-1 focus:ring-brand-gold/50
-                    transition-colors duration-200"
-                >
-                  <option value="en">English</option>
-                  <option value="es">Spanish</option>
-                  <option value="fr">French</option>
-                </select>
+              {/* Appearance */}
+              <div className="bg-kemo-gray-800 rounded-xl p-6">
+                <h2 className="text-xl font-semibold mb-6">Appearance</h2>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium">Dark Mode</h3>
+                    <p className="text-sm text-white/60">
+                      Toggle dark mode on or off
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsDark(!isDark)}
+                    className={`p-2 rounded-lg transition-colors ${
+                      isDark ? 'bg-brand-gold text-black' : 'bg-kemo-gray-900'
+                    }`}
+                  >
+                    {isDark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
 
               {/* Notifications */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-brand-gold" />
-                  <span className="text-white">Enable Notifications</span>
+              <div className="bg-kemo-gray-800 rounded-xl p-6">
+                <h2 className="text-xl font-semibold mb-6">Notifications</h2>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">Push Notifications</h3>
+                      <p className="text-sm text-white/60">
+                        Get notified about new releases
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setNotifications(!notifications)}
+                      className={`w-12 h-6 rounded-full transition-colors relative ${
+                        notifications ? 'bg-brand-gold' : 'bg-kemo-gray-900'
+                      }`}
+                    >
+                      <div
+                        className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                          notifications ? 'right-1' : 'left-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={preferences?.enable_notifications}
-                    onChange={(e) => setPreferences(prev => ({
-                      ...prev!,
-                      enable_notifications: e.target.checked
-                    }))}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-white/10 rounded-full peer 
-                    peer-checked:bg-brand-gold transition-colors duration-200" />
-                </label>
               </div>
 
-              {/* Theme */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Palette className="w-5 h-5 text-brand-gold" />
-                  <span className="text-white">Dark Mode</span>
+              {/* Content Preferences */}
+              <div className="bg-kemo-gray-800 rounded-xl p-6">
+                <h2 className="text-xl font-semibold mb-6">Content Preferences</h2>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium mb-2">Favorite Genres</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        'Action',
+                        'Comedy',
+                        'Drama',
+                        'Horror',
+                        'Sci-Fi',
+                        'Romance'
+                      ].map((genre) => (
+                        <button
+                          key={genre}
+                          className="px-4 py-2 rounded-lg bg-kemo-gray-900 hover:bg-brand-gold hover:text-black transition-colors"
+                        >
+                          {genre}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={preferences?.theme === 'dark'}
-                    onChange={(e) => setPreferences(prev => ({
-                      ...prev!,
-                      theme: e.target.checked ? 'dark' : 'light'
-                    }))}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-white/10 rounded-full peer 
-                    peer-checked:bg-brand-gold transition-colors duration-200" />
-                </label>
               </div>
             </div>
-          </section>
+          )}
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-between pt-4">
-            <button
-              onClick={handleLogout}
-              disabled={isLoading}
-              className="flex items-center space-x-2 px-6 py-2 
-                bg-white/10 hover:bg-white/20 rounded-lg
-                text-white transition-colors duration-200"
-            >
-              <LogOut className="w-5 h-5" />
-              <span>Sign Out</span>
-            </button>
+      {/* Action Buttons */}
+      <div className="mt-8 flex justify-between items-center">
+        <button 
+          onClick={() => setShowLogoutConfirm(true)}
+          className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center space-x-2"
+        >
+          <LogOut className="w-4 h-4" />
+          <span>Sign Out</span>
+        </button>
 
-            <button
-              onClick={handleSavePreferences}
-              disabled={isSaving}
-              className="flex items-center space-x-2 px-6 py-2 
-                bg-brand-gold hover:bg-brand-darker rounded-lg
-                text-kemo-black font-medium 
-                transition-colors duration-200"
-            >
-              <Save className="w-5 h-5" />
-              <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
-            </button>
+        <div className="flex space-x-4">
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-kemo-gray-800 hover:bg-kemo-gray-700 rounded-lg transition-colors"
+          >
+            Reset Changes
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className={`px-6 py-2 bg-brand-gold hover:bg-brand-darker text-black rounded-lg transition-colors flex items-center space-x-2
+              ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isSaving ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>Save Changes</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-kemo-gray-800 rounded-xl p-6 max-w-md w-full">
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="p-2 bg-red-500/20 rounded-full">
+                <AlertTriangle className="w-6 h-6 text-red-500" />
+              </div>
+              <h2 className="text-xl font-semibold">Confirm Sign Out</h2>
+            </div>
+            
+            <p className="text-white/60 mb-6">
+              Are you sure you want to sign out? You will need to sign in again to access your account.
+            </p>
+
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="px-4 py-2 bg-kemo-gray-700 hover:bg-kemo-gray-600 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  // Handle logout here
+                  console.log('Logging out...');
+                }}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
           </div>
         </div>
+      )}
+
+      {/* Success Toast Notification */}
+      <div className="fixed bottom-4 right-4 flex flex-col space-y-4">
+        {isSaving && (
+          <div className="bg-brand-gold text-black px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 animate-fade-in">
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent" />
+            <span>Saving changes...</span>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
+// Add some custom animations
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(1rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+`;
+document.head.appendChild(style);
