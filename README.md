@@ -38,6 +38,7 @@ export default tseslint.config({
   settings: { react: { version: '18.3' } },
   plugins: {
     // Add the react plugin
+```
 ## 🚧 Development Status
 
 ### 📊 Dashboard & User Features
@@ -61,13 +62,11 @@ export default tseslint.config({
 
 ### 🔐 Authentication & Session Management
 
-> ⚠️ **Note:** Due to Supabase database connectivity issues, the following features are using temporary implementations:
+> ⚠️ **Note:**Login via Google Authenticatiom
 
 #### Current Implementation:
 - ✅ Google Authentication sign-in/sign-up
-- ❌ Session persistence not implemented
-- ❌ Token management pending
-- ❌ User data synchronization waiting for database connection
+
 
 #### Planned Features (Pending Database Connection):
 - 🔄 Persistent sessions
